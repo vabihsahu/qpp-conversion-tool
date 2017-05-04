@@ -99,6 +99,7 @@ public class Converter {
 
 	public TransformationStatus transform() {
 		DEV_LOG.info("Transform invoked with file {}", inFile);
+		DEV_LOG.info("Transform invoked with stream {}", xmlStream);
 		try {
 			if (!usingStream()) {
 				transform(inFile);
@@ -146,8 +147,10 @@ public class Converter {
 	 * @throws XmlException during transform
 	 */
 	private Node transform(InputStream inStream) throws XmlException {
+		DEV_LOG.info("Converter#transform called with InputStream");
 		QrdaValidator validator = new QrdaValidator();
 		decoded = XmlInputDecoder.decodeXml(XmlUtils.parseXmlStream(inStream));
+		DEV_LOG.info("After XmlInputDecoder.decodeXml");
 		if (null != decoded) {
 			CLIENT_LOG.info("Decoded template ID {} from file '{}'", decoded.getId(), inStream);
 
@@ -158,8 +161,10 @@ public class Converter {
 				validationErrors.addAll(validator.validate(decoded));
 			}
 		} else {
+			DEV_LOG.info("The file is not a QRDA-III XML document");
 			validationErrors.add(new ValidationError("The file is not a QRDA-III XML document"));
 		}
+		DEV_LOG.info("Leaving Converter#transform");
 
 		return decoded;
 	}
@@ -191,6 +196,7 @@ public class Converter {
 	 * @return resulting transformation output content
 	 */
 	public InputStream getConversionResult() {
+		DEV_LOG.info("In Converter#getConversionResult");
 		return (!validationErrors.isEmpty())
 				? writeValidationErrorsToStream()
 				: writeConverted();
@@ -298,6 +304,7 @@ public class Converter {
 			validationErrors.addAll(encoder.getValidationErrors());
 			return inputStream;
 		} catch (EncodeException e) {
+			DEV_LOG.error("XmlInputFileException Issues decoding/encoding");
 			throw new XmlInputFileException("Issues decoding/encoding.", e);
 		}
 	}
