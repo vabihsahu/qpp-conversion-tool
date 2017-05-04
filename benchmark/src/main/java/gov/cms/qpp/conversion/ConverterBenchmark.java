@@ -18,6 +18,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 import org.xml.sax.SAXException;
 
@@ -31,9 +32,10 @@ import javax.xml.validation.SchemaFactory;
 /**
  * Performance test harness.
  */
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.MILLISECONDS)
-@Fork(3)
+@Warmup(iterations = 0, time = 1, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MILLISECONDS)
+@Fork(value = 15, jvmArgsPrepend = {"-Xmx50m", "-Xms50m"})
+@Threads(1)
 public class ConverterBenchmark {
 
 	/**
@@ -43,8 +45,8 @@ public class ConverterBenchmark {
 	public static class Cleaner {
 		@TearDown(Level.Trial)
 		public void doTearDown() throws IOException {
-			//Path fileToDeletePath = Paths.get("valid-QRDA-III.qpp.json");
-			Path fileToDeletePath = Paths.get("gpro-biggest.qpp.json");
+			Path fileToDeletePath = Paths.get("valid-QRDA-III.qpp.json");
+//			Path fileToDeletePath = Paths.get("gpro-biggest.qpp.json");
 			Files.delete(fileToDeletePath);
 		}
 	}
@@ -54,33 +56,33 @@ public class ConverterBenchmark {
 	 *
 	 * @param cleaner State management for conversion runs, ensures that output files are deleted.
 	 */
-//	@Benchmark
-//	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-//	public void benchmarkMain(Cleaner cleaner) {
-////		ConversionEntry.main("src/main/resources/qrda-files/valid-QRDA-III.xml");
-//		ConversionEntry.main("src/main/resources/qrda-files/gpro-biggest.xml", "-d");
-//	}
-
 	@Benchmark
 	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-	public void benchmarkValidate() throws IOException, ParserConfigurationException, SAXException {
-		String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
-		SchemaFactory factory = SchemaFactory.newInstance(language);
-		//Schema schema = factory.newSchema(new File("src/main/resources/qrda-conversion.xsd"));
-		Schema schema = factory.newSchema(new File("src/main/resources/cda/infrastructure/cda/CDA_SDTC.xsd"));
-
-		SAXParserFactory spf = SAXParserFactory.newInstance();
-		spf.setNamespaceAware(true);
-		spf.setValidating(false);
-		spf.setSchema(schema);
-
-		SAXParser parser = spf.newSAXParser();
-
-		Path path = Paths.get("src/main/resources/qrda-files/valid-QRDA-III.xml");
-		InputStream historical = new BufferedInputStream(Files.newInputStream(path));
-
-		parser.parse(historical, new ConversionHandler());
+	public void benchmarkMain(Cleaner cleaner) {
+		ConversionEntry.main("src/main/resources/qrda-files/valid-QRDA-III.xml");
+		//ConversionEntry.main("src/main/resources/qrda-files/gpro-biggest.xml", "-d");
 	}
+
+//	@Benchmark
+//	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
+//	public void benchmarkValidate() throws IOException, ParserConfigurationException, SAXException {
+//		String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+//		SchemaFactory factory = SchemaFactory.newInstance(language);
+//		//Schema schema = factory.newSchema(new File("src/main/resources/qrda-conversion.xsd"));
+//		Schema schema = factory.newSchema(new File("src/main/resources/cda/infrastructure/cda/CDA_SDTC.xsd"));
+//
+//		SAXParserFactory spf = SAXParserFactory.newInstance();
+//		spf.setNamespaceAware(true);
+//		spf.setValidating(false);
+//		spf.setSchema(schema);
+//
+//		SAXParser parser = spf.newSAXParser();
+//
+//		Path path = Paths.get("src/main/resources/qrda-files/valid-QRDA-III.xml");
+//		InputStream historical = new BufferedInputStream(Files.newInputStream(path));
+//
+//		parser.parse(historical, new ConversionHandler());
+//	}
 
 
 
