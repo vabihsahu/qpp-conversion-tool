@@ -70,21 +70,22 @@ public class ConverterBenchmark {
 	@Benchmark
 	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
 	public void benchmarkValidate() throws IOException, ParserConfigurationException, SAXException {
-		String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 		ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
-
 		long time = mxBean.getCurrentThreadCpuTime();
+		String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+
+
 		//SchemaFactory factory = SchemaFactory.newInstance(language);
 		SchemaFactory factory = new XMLSchemaFactory();
-		System.out.println("After SchemaFactory.newInstance: " + (mxBean.getCurrentThreadCpuTime() - time));
+		//System.out.println("After SchemaFactory.newInstance: " + (mxBean.getCurrentThreadCpuTime() - time));
 
-		Schema schema = factory.newSchema(new File("src/main/resources/qrda-conversion.xsd"));
-		//Schema schema = factory.newSchema(new File("src/main/resources/cda/infrastructure/cda/CDA_SDTC.xsd"));
+		//Schema schema = factory.newSchema(new File("src/main/resources/qrda-conversion.xsd"));
+		Schema schema = factory.newSchema(new File("src/main/resources/cda/infrastructure/cda/CDA_SDTC.xsd"));
 
-		time = mxBean.getCurrentThreadCpuTime();
+		//time = mxBean.getCurrentThreadCpuTime();
 		//SAXParserFactory spf = SAXParserFactory.newInstance();
 		SAXParserFactory spf = new SAXParserFactoryImpl();
-		System.out.println("After SAXParserFactory.newInstance: " + (mxBean.getCurrentThreadCpuTime() - time));
+		//System.out.println("After SAXParserFactory.newInstance: " + (mxBean.getCurrentThreadCpuTime() - time));
 
 		spf.setNamespaceAware(true);
 		spf.setValidating(false);
@@ -96,6 +97,7 @@ public class ConverterBenchmark {
 		InputStream historical = new BufferedInputStream(Files.newInputStream(path));
 
 		parser.parse(historical, new ConversionHandler());
+		System.out.println("After: " + (mxBean.getCurrentThreadCpuTime() - time));
 	}
 
 
