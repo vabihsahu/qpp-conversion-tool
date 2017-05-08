@@ -6,16 +6,88 @@
 
     <xs:element name="ClinicalDocument">
         <xs:complexType>
-            <xs:all>
+            <xs:sequence>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="templateId" type="cdTemplateIdType" minOccurs="1" maxOccurs="1"/>
-            </xs:all>
+                <xs:element name="component" type="topLevelComponentType"/>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:anyAttribute processContents="skip"/>
         </xs:complexType>
     </xs:element>
 
-    <!-- define the root type -->
-    <xs:complexType name="cdTemplateIdType">
-        <xs:attribute name="root" type="xs:string" fixed="2.16.840.1.113883.10.20.27.1.1" />
+    <xs:complexType name="topLevelComponentType">
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="structuredBody" type="structuredBodyType"/>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <xs:complexType name="structuredBodyType">
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="component" type="sectionComponentType" maxOccurs="unbounded"/>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <!-- ACI -->
+    <xs:complexType name="sectionComponentType">
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="section" type="sectionType"/>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <xs:complexType name="sectionType">
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="templateId" type="aciSectionTemplateIdType" minOccurs="1" maxOccurs="1"/>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <xs:complexType name="aciSectionTemplateIdType">
+        <xs:attribute name="root" type="xs:string" fixed="2.16.840.1.113883.10.20.27.2.5" />
         <xs:attribute name="extension" type="xs:string" fixed="2016-09-01" />
     </xs:complexType>
+
+    <!-- IA -->
+    <xs:complexType name="iaSectionComponentType">
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="section" type="iaSectionType"/>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <xs:complexType name="iaSectionType">
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="templateId" type="iaSectionTemplateIdType" minOccurs="1" maxOccurs="1"/>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <xs:complexType name="iaSectionTemplateIdType">
+        <xs:attribute name="root" type="xs:string" fixed="2.16.840.1.113883.10.20.27.2.4" />
+        <xs:attribute name="extension" type="xs:string" fixed="2016-09-01" />
+    </xs:complexType>
+
+
+    <xs:complexType name="cdTemplateIdType">
+        <xs:attribute name="root" type="xs:string" fixed="2.16.840.1.113883.10.20.27.1.2" />
+        <xs:attribute name="extension" type="xs:string" fixed="2016-11-01" />
+    </xs:complexType>
+
+
 
 </xs:schema>
