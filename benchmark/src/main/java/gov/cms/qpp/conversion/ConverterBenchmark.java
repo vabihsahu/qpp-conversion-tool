@@ -65,11 +65,11 @@ public class ConverterBenchmark {
 	 *
 	 * @param cleaner State management for conversion runs, ensures that output files are deleted.
 	 */
-	@Benchmark
-	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-	public void benchmarkMain(Cleaner cleaner) {
-		ConversionEntry.main(filePath);
-	}
+//	@Benchmark
+//	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
+//	public void benchmarkMain(Cleaner cleaner) {
+//		ConversionEntry.main(filePath);
+//	}
 
 	@Benchmark
 	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
@@ -83,14 +83,12 @@ public class ConverterBenchmark {
 		InputStream historical = new BufferedInputStream(Files.newInputStream(path));
 
 		parser.parse(historical, new ConversionHandler());
-		System.out.println("After: " + (mxBean.getCurrentThreadCpuTime() - time));
+		//System.out.println("After: " + (mxBean.getCurrentThreadCpuTime() - time));
 	}
 
 	@Benchmark
 	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
 	public void benchmarkPullParse() throws FileNotFoundException, XMLStreamException {
-		ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
-		long time = mxBean.getCurrentThreadCpuTime();
 		Path path = Paths.get(filePath);
 		XMLInputFactory factory = XMLInputFactory.newInstance();
 		XMLStreamReader r =
@@ -107,7 +105,6 @@ public class ConverterBenchmark {
 				}
 			}
 		}
-		System.out.println("After pull: " + (mxBean.getCurrentThreadCpuTime() - time));
 	}
 
 
