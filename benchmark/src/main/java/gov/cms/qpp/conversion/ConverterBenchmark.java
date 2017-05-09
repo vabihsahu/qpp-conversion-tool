@@ -76,26 +76,9 @@ public class ConverterBenchmark {
 	public void benchmarkStreamingParser() throws IOException, ParserConfigurationException, SAXException {
 		ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
 		long time = mxBean.getCurrentThreadCpuTime();
-		String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
-
-		SchemaFactory factory = SchemaFactory.newInstance(language);
-		//SchemaFactory factory = new XMLSchemaFactory();
-		//System.out.println("After SchemaFactory.newInstance: " + (mxBean.getCurrentThreadCpuTime() - time));
-
-		//Schema schema = factory.newSchema(new File(schemaPath));
-
-		//time = mxBean.getCurrentThreadCpuTime();
 		SAXParserFactory spf = SAXParserFactory.newInstance();
-		//SAXParserFactory spf = new SAXParserFactoryImpl();
-		//System.out.println("After SAXParserFactory.newInstance: " + (mxBean.getCurrentThreadCpuTime() - time));
-
-		spf.setNamespaceAware(true);
-		spf.setValidating(false);
-		//spf.setSchema(schema);
-
 		SAXParser parser = spf.newSAXParser();
-
 		Path path = Paths.get(filePath);
 		InputStream historical = new BufferedInputStream(Files.newInputStream(path));
 
@@ -106,6 +89,8 @@ public class ConverterBenchmark {
 	@Benchmark
 	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
 	public void benchmarkPullParse() throws FileNotFoundException, XMLStreamException {
+		ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
+		long time = mxBean.getCurrentThreadCpuTime();
 		Path path = Paths.get(filePath);
 		XMLInputFactory factory = XMLInputFactory.newInstance();
 		XMLStreamReader r =
@@ -118,10 +103,11 @@ public class ConverterBenchmark {
 				String name = r.getLocalName();
 				if ("templateId".equals(name)) {
 					String templateId = r.getAttributeValue("", "root");
-					System.out.println("template Id: " + templateId);
+					//System.out.println("template Id: " + templateId);
 				}
 			}
 		}
+		System.out.println("After pull: " + (mxBean.getCurrentThreadCpuTime() - time));
 	}
 
 
