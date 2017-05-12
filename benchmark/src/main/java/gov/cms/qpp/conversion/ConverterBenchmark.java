@@ -21,8 +21,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,9 +47,9 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 1, jvmArgsPrepend = {"-Xmx50m", "-Xms50m"})
 @Threads(1)
 public class ConverterBenchmark {
-//	private static String filePath = "src/main/resources/qrda-files/valid-QRDA-III.xml";
+	private static String filePath = "src/main/resources/qrda-files/valid-QRDA-III.xml";
 //	private static String output = "valid-QRDA-III.qpp.json";
-	private static String filePath = "src/main/resources/qrda-files/gpro-biggest.xml";
+	//private static String filePath = "src/main/resources/qrda-files/gpro-biggest.xml";
 	private static String output = "gpro-biggest.qpp.json";
 	private static String schemaPath = "src/main/resources/cda/infrastructure/cda/CDA_SDTC.xsd";
 
@@ -84,6 +89,40 @@ public class ConverterBenchmark {
 
 		parser.parse(historical, new ConversionHandler());
 		//System.out.println("After: " + (mxBean.getCurrentThreadCpuTime() - time));
+	}
+
+	@Benchmark
+	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
+	public void benchmarkValidatingStreamingParser() throws IOException, ParserConfigurationException, SAXException {
+		ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
+		long time = mxBean.getCurrentThreadCpuTime();
+
+		Source xmlFile = new StreamSource(new File(filePath));
+		SchemaFactory schemaFactory = SchemaFactory
+				.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = schemaFactory.newSchema(new File(schemaPath));
+
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		spf.setNamespaceAware(true);
+		spf.setValidating(false);
+		spf.setSchema(schema);
+		SAXParser parser = spf.newSAXParser();
+		Path path = Paths.get(filePath);
+		InputStream historical = new BufferedInputStream(Files.newInputStream(path));
+
+		parser.parse(historical, new ConversionHandler());
+		//System.out.println("After: " + (mxBean.getCurrentThreadCpuTime() - time));
+	}
+
+	@Benchmark
+	@BenchmarkMode({Mode.Throughput, Mode.AverageTime})
+	public void benchmarkValidation() throws IOException, ParserConfigurationException, SAXException {
+		Source xmlFile = new StreamSource(new File(filePath));
+		SchemaFactory schemaFactory = SchemaFactory
+				.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = schemaFactory.newSchema(new File(schemaPath));
+		Validator validator = schema.newValidator();
+		validator.validate(xmlFile);
 	}
 
 	@Benchmark
