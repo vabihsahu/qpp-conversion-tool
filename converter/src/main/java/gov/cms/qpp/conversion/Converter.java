@@ -17,6 +17,7 @@ import gov.cms.qpp.conversion.model.error.Error;
 import gov.cms.qpp.conversion.model.error.ErrorCode;
 import gov.cms.qpp.conversion.model.error.TransformException;
 import gov.cms.qpp.conversion.util.CloneHelper;
+import gov.cms.qpp.conversion.util.ObjectMappers;
 import gov.cms.qpp.conversion.validate.QrdaValidator;
 import gov.cms.qpp.conversion.xml.XmlException;
 import gov.cms.qpp.conversion.xml.XmlUtils;
@@ -177,7 +178,6 @@ public class Converter {
 	 * Report on the stat of a conversion.
 	 */
 	public class ConversionReport {
-		private final ObjectMapper mapper = new ObjectMapper();
 		private AllErrors reportDetails;
 		private String qppValidationDetails;
 
@@ -248,7 +248,7 @@ public class Converter {
 		 */
 		public InputStream streamDetails() {
 			try {
-				return new ByteArrayInputStream(mapper.writeValueAsBytes(reportDetails));
+				return new ByteArrayInputStream(ObjectMappers.WRITER.writeValueAsBytes(reportDetails));
 			} catch (JsonProcessingException e) {
 				throw new EncodeException("Issue serializing error report details", e);
 			}

@@ -7,6 +7,8 @@ import gov.cms.qpp.conversion.correlation.model.Correlation;
 import gov.cms.qpp.conversion.correlation.model.Goods;
 import gov.cms.qpp.conversion.correlation.model.PathCorrelation;
 import gov.cms.qpp.conversion.encode.JsonWrapper;
+import gov.cms.qpp.conversion.util.ObjectMappers;
+
 import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +46,7 @@ public class PathCorrelator {
 
 		try {
 			InputStream input = ClasspathHelper.contextClassLoader().getResourceAsStream(config);
-			ObjectMapper mapper = new ObjectMapper();
-			pathCorrelation = mapper.readValue(input, PathCorrelation.class);
+			pathCorrelation = ObjectMappers.READER.forType(PathCorrelation.class).readValue(input);
 			flattenCorrelations(pathCorrelation);
 		} catch (IOException ioe) {
 			String message = "Problem loading path correlation configuration";
