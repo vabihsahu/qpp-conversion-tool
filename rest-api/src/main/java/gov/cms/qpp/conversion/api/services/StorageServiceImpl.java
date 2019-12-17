@@ -124,7 +124,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		RestTemplate retrievePresignedUrlRest = new RestTemplate();
 		RequestEntity<?> entity = RequestEntity.get(
 					URI.create(arUrl))
-				.header("Authorization", "Bearer: " + fmsToken)
+				.header("Authorization", "Bearer " + fmsToken)
 				.build();
 		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
 		String s3PresignedUrl = response.getBody();
