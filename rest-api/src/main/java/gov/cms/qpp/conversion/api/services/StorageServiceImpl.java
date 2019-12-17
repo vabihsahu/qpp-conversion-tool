@@ -121,18 +121,22 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		}
 		API_LOG.info("Retrieving CPC+ validation file from FMS");
 
-		RestTemplate rest = new RestTemplate();
+		RestTemplate retrievePresignedUrlRest = new RestTemplate();
 		RequestEntity<?> entity = RequestEntity.get(
 					URI.create(arUrl))
 				.header("Authorization", "Bearer: " + fmsToken)
 				.build();
-		ResponseEntity<String> response = rest.exchange(entity, String.class);
+		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
 		String s3PresignedUrl = response.getBody();
+
 		if (StringUtils.isNotEmpty(s3PresignedUrl)) {
-			System.out.println("Received a valid presigned url: " + s3PresignedUrl);
-			return new byte[0];
+			RestTemplate retrieveFileRest = new RestTemplate();
+			RequestEntity<?> fileEntity = RequestEntity.get(URI.create(s3PresignedUrl)).build();
+			ResponseEntity<byte[]> fileResponse = retrieveFileRest.exchange(fileEntity, byte[].class);
+			return fileResponse.getBody();
 		}
-		API_LOG.error("/qppct/cpc_plus_validation_file was empty, missing, or did not return a response body. "
+
+		API_LOG.error(arUrl + " was empty, missing, or did not return a response body. "
 				+ "HTTP Status was " + response.getStatusCodeValue());
 		return new byte[0];
 	}
