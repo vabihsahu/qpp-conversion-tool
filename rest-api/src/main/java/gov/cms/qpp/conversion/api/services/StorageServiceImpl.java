@@ -151,7 +151,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 //				.accept(MediaType.APPLICATION_JSON)
 //				.build();
 		//		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
-		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(arUrl , HttpMethod.GET,
+		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(arUrl, HttpMethod.GET,
 			new HttpEntity<>("parameters", getHeaders(fmsToken)), String.class);
 		String s3PresignedUrl = response.getBody();
 
