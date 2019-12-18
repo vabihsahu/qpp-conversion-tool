@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -142,6 +143,8 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		RequestEntity<?> entity = RequestEntity.get(
 					URI.create(arUrl))
 				.header("Authorization", "Bearer " + fmsToken)
+				.header("User-Agent", "Rest-template" )
+				.accept(MediaType.APPLICATION_JSON)
 				.build();
 		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
 		String s3PresignedUrl = response.getBody();
