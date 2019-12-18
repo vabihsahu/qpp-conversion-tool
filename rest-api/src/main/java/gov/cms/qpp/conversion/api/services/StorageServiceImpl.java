@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -162,7 +163,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		try {
 			SSLContext sslContext =
 				org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NullHostnameVerifier());
+			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
 			CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
 			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 			requestFactory.setHttpClient(httpClient);
