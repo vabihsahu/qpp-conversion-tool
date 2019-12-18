@@ -158,12 +158,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 	}
 
 	private void setRestTemplate(RestTemplate template) {
-		TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-			@Override
-			public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-				return true;
-			}
-		};
+		TrustStrategy acceptingTrustStrategy = (x509Certificates, s) -> true;
 		try {
 			SSLContext sslContext =
 				org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
