@@ -21,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +56,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		implements StorageService {
 
 	private static final Logger API_LOG = LoggerFactory.getLogger(StorageServiceImpl.class);
+	static final String CONTENT_TYPE = "application/json";
 
 	private final TransferManager s3TransferManager;
 	private final Environment environment;
@@ -140,13 +144,15 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 
 		RestTemplate retrievePresignedUrlRest = new RestTemplate();
 		setRestTemplate(retrievePresignedUrlRest);
-		RequestEntity<?> entity = RequestEntity.get(
-					URI.create(arUrl))
-				.header("Authorization", "Bearer " + fmsToken)
-				.header("User-Agent", "Rest-template" )
-				.accept(MediaType.APPLICATION_JSON)
-				.build();
-		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
+//		RequestEntity<?> entity = RequestEntity.get(
+//					URI.create(arUrl))
+//				.header("Authorization", "Bearer " + fmsToken)
+//				.header("User-Agent", "Rest-template" )
+//				.accept(MediaType.APPLICATION_JSON)
+//				.build();
+		//		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
+		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(arUrl , HttpMethod.GET,
+			new HttpEntity<>("parameters", getHeaders(fmsToken)), String.class);
 		String s3PresignedUrl = response.getBody();
 
 		if (StringUtils.isNotEmpty(s3PresignedUrl)) {
@@ -174,6 +180,19 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		} catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException exc) {
 			API_LOG.error("Unable to update certificate settings...");
 		}
+	}
+
+	HttpHeaders getHeaders(String fmsToken) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE);
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE);
+
+		if (fmsToken != null && !fmsToken.isEmpty()) {
+			headers.add(HttpHeaders.AUTHORIZATION,
+				"Bearer " + fmsToken);
+		}
+
+		return headers;
 	}
 
 	/**
