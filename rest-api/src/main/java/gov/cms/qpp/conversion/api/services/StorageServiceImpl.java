@@ -25,8 +25,12 @@ import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 
+import gov.cms.qpp.conversion.api.config.CustomSimpleClientHttpRequestFactory;
 import gov.cms.qpp.conversion.api.exceptions.UncheckedInterruptedException;
 import gov.cms.qpp.conversion.api.model.Constants;
+import gov.cms.qpp.conversion.api.model.NullHostnameVerifier;
+
+import javax.net.ssl.HostnameVerifier;
 
 /**
  * Used to store an {@link InputStream} in S3.
@@ -122,6 +126,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		API_LOG.info("Retrieving CPC+ validation file from FMS");
 
 		RestTemplate retrievePresignedUrlRest = new RestTemplate();
+		setRestTemplate(retrievePresignedUrlRest);
 		RequestEntity<?> entity = RequestEntity.get(
 					URI.create(arUrl))
 				.header("Authorization", "Bearer " + fmsToken)
@@ -139,6 +144,12 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		API_LOG.error(arUrl + " was empty, missing, or did not return a response body. "
 				+ "HTTP Status was " + response.getStatusCodeValue());
 		return new byte[0];
+	}
+
+	private void setRestTemplate(RestTemplate template) {
+		HostnameVerifier verifier = new NullHostnameVerifier();
+		CustomSimpleClientHttpRequestFactory factory = new CustomSimpleClientHttpRequestFactory(verifier);
+		template.setRequestFactory(factory);
 	}
 
 	/**
