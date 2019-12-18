@@ -2,17 +2,27 @@ package gov.cms.qpp.conversion.api.services;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,6 +41,7 @@ import gov.cms.qpp.conversion.api.model.Constants;
 import gov.cms.qpp.conversion.api.model.NullHostnameVerifier;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 
 /**
  * Used to store an {@link InputStream} in S3.
@@ -129,7 +140,7 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 		setRestTemplate(retrievePresignedUrlRest);
 		RequestEntity<?> entity = RequestEntity.get(
 					URI.create(arUrl))
-				.header("Authorization", fmsToken)
+				.header("Authorization", "Bearer " + fmsToken)
 				.build();
 		ResponseEntity<String> response = retrievePresignedUrlRest.exchange(entity, String.class);
 		String s3PresignedUrl = response.getBody();
@@ -147,9 +158,23 @@ public class StorageServiceImpl extends AnyOrderActionService<Supplier<PutObject
 	}
 
 	private void setRestTemplate(RestTemplate template) {
-		HostnameVerifier verifier = new NullHostnameVerifier();
-		CustomSimpleClientHttpRequestFactory factory = new CustomSimpleClientHttpRequestFactory(verifier);
-		template.setRequestFactory(factory);
+		TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+			@Override
+			public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+				return true;
+			}
+		};
+		try {
+			SSLContext sslContext =
+				org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NullHostnameVerifier());
+			CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+			requestFactory.setHttpClient(httpClient);
+			template.setRequestFactory(requestFactory);
+		} catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException exc) {
+			API_LOG.error("Unable to update certificate settings...");
+		}
 	}
 
 	/**
